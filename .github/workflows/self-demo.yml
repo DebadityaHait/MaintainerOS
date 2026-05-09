@@ -1,0 +1,28 @@
+name: Maintainer digest (self-demo)
+
+# Dogfooding: run maintainer-agent on this very repository and publish a
+# read-only digest to the workflow summary. Weekly + on demand.
+on:
+  schedule:
+    - cron: "0 8 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run maintainer-agent on this repo
+        uses: ./
+        # github-token defaults to the workflow token - no need to pass it.
+        # Optional inputs:
+        # with:
+        #   lang: en              # en (default) or zh
+        #   mode: weekly          # weekly report mode (last 7 days)
+        #   llm-model: deepseek/deepseek-v4-flash  # enable real LLM (optional)
+        #   llm-api-key: ${{ secrets.DEEPSEEK_API_KEY }}
