@@ -1,0 +1,62 @@
+name: "OSS Maintainer Assistant"
+description: "Triage issues/PRs, flag AI slop, reproduce bugs, draft replies, and post a maintainer digest. Read-only."
+author: "MaintainerOS contributors"
+branding:
+  icon: "shield"
+  color: "purple"
+
+inputs:
+  repo:
+    description: "owner/name to analyze. Defaults to the current repository."
+    required: false
+    default: ""
+  mode:
+    description: "Analysis mode: 'digest' (snapshot) or 'weekly' (last N days report)."
+    required: false
+    default: "digest"
+  limit:
+    description: "Maximum number of open items to analyze."
+    required: false
+    default: "30"
+  days:
+    description: "Look-back window in days (weekly mode only)."
+    required: false
+    default: "7"
+  lang:
+    description: "Digest language: 'en' or 'zh'."
+    required: false
+    default: "en"
+  github-token:
+    description: >-
+      Token used to read issues/PRs. Defaults to the workflow token, which is
+      passed into the action container on every run; pass an explicitly empty
+      value to opt out (runs unauthenticated and rate-limited). Note that an
+      undefined secret resolves to an empty string and bypasses this default.
+    required: false
+    default: ${{ github.token }}
+  llm-model:
+    description: "LLM model string for enhanced analysis (e.g. 'deepseek/deepseek-v4-flash'). Leave empty for offline rule-based mode."
+    required: false
+    default: ""
+  llm-api-key:
+    description: "API key for the LLM provider. Leave empty for offline mode."
+    required: false
+    default: ""
+
+outputs:
+  digest-path:
+    description: "Path to the generated digest/weekly report markdown file."
+
+runs:
+  using: "docker"
+  image: "Dockerfile"
+  entrypoint: "/app/action-entrypoint.sh"
+  env:
+    INPUT_REPO: ${{ inputs.repo }}
+    INPUT_MODE: ${{ inputs.mode }}
+    INPUT_LIMIT: ${{ inputs.limit }}
+    INPUT_DAYS: ${{ inputs.days }}
+    INPUT_LANG: ${{ inputs.lang }}
+    GITHUB_TOKEN: ${{ inputs.github-token }}
+    MAINTAINER_AGENT_LLM_MODEL: ${{ inputs.llm-model }}
+    LLM_API_KEY: ${{ inputs.llm-api-key }}
